@@ -7,7 +7,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          <code>App.js</code> and sds to reload.
+          <code>Test.js</code> and sds to reload.
         </p>
         <a
           className="App-link"

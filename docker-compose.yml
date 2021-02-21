@@ -1,19 +1,64 @@
-# version: "3.9"  # optional
+version: "3"  # optional
 services:
   nginx:
     restart: always
     build:
       dockerfile: Dockerfile
-      context: ./services/nginx
+      context: ./nginx
     ports:
       - '80:80'
       - '443:443'
     volumes:
-      - ./services/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - /etc/nginx/conf.d/certs
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - frontend
+      - api-gateway
+      - products
   frontend:
     build:
       dockerfile: Dockerfile
-      context: ./services/frontend/
+      context: ./frontend/
+    volumes:
+      - /usr/src/certs
+      - /usr/src/app/node_modules
+      - ./frontend/app:/usr/src/app
+    restart: on-failure
+    ports:
+      - '3000:3000'
+    expose:
+     - "3000"
+  api-gateway:
+    build:
+      dockerfile: Dockerfile
+      context: ./api-gateway/
     volumes:
       - /usr/src/app/node_modules
-      - ./services/frontend/app:/usr/src/app
+      - ./api-gateway/index.js:/usr/src/app/index.js
+    restart: on-failure
+    expose:
+      - "4000"
+
+  # All product services below this line
+  products:
+    build:
+      dockerfile: Dockerfile
+      context: ./services/products/
+    volumes:
+      - /usr/src/app/node_modules
+      - ./services/products/index.js:/usr/src/app/index.js
+    restart: on-failure
+    expose:
+      - "4001"
+
+  users:
+    build:
+      dockerfile: Dockerfile
+      context: ./services/users/
+    volumes:
+      - /usr/src/app/node_modules
+      - ./services/users/index.js:/usr/src/app/index.js
+    restart: on-failure
+    expose:
+      - "4002"
+
